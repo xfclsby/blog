@@ -79,7 +79,7 @@ export default function Post() {
         <ReactMarkdown
           components={{
             code({node, inline, className, children, ...props}) {
-              const match = /language-(\w+)/.exec(className || '')
+              const match = /language-(\w+)/.exec(className || '');
               const [copied, setCopied] = useState(false);
 
               const handleCopy = () => {
@@ -88,32 +88,52 @@ export default function Post() {
                 setTimeout(() => setCopied(false), 2000);
               };
 
-              return !inline && match ? (
-                <div className="rounded-xl overflow-hidden shadow-2xl my-6 border border-gray-800 bg-[#1e1e1e] group relative">
-                  <div className="absolute top-3 right-3 flex items-center gap-3 z-10">
-                    <span className="text-xs text-gray-500 font-mono font-bold uppercase tracking-wider select-none">
-                      {match[1]}
-                    </span>
-                    <button 
-                      onClick={handleCopy}
-                      className={`p-1.5 rounded-lg transition-all duration-200 border border-transparent ${
-                        copied 
-                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
-                          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white opacity-0 group-hover:opacity-100'
-                      }`}
-                      title="Copy code"
-                    >
-                      {copied ? <FaCheck className="w-3.5 h-3.5" /> : <FaCopy className="w-3.5 h-3.5" />}
-                    </button>
+              // If it's inline code, return default styling
+              if (inline) {
+                return (
+                  <code className={`${className} bg-gray-100 dark:bg-gray-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded font-mono text-sm font-medium`} {...props}>
+                    {children}
+                  </code>
+                );
+              }
+
+              // For block code (even without language), apply Mac window style
+              const language = match ? match[1] : 'text';
+
+              return (
+                <div className="rounded-xl overflow-hidden shadow-2xl my-6 border border-gray-700/50 bg-[#1e1e1e] group relative">
+                  {/* Mac Window Header */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-[#252526] border-b border-black/20">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]"></div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-gray-400 font-mono font-bold uppercase tracking-wider select-none opacity-0 group-hover:opacity-100 transition-opacity">
+                        {language}
+                      </span>
+                      <button 
+                        onClick={handleCopy}
+                        className={`p-1.5 rounded-lg transition-all duration-200 border border-transparent ${
+                          copied 
+                            ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white opacity-0 group-hover:opacity-100'
+                        }`}
+                        title="Copy code"
+                      >
+                        {copied ? <FaCheck className="w-3.5 h-3.5" /> : <FaCopy className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
                   </div>
                   
                   <SyntaxHighlighter
                     style={vscDarkPlus}
-                    language={match[1]}
+                    language={language}
                     PreTag="div"
                     customStyle={{
                       margin: 0,
-                      padding: '2.5rem 1.5rem 1.5rem 1.5rem',
+                      padding: '1.5rem',
                       background: '#1e1e1e',
                       fontSize: '0.9rem',
                       lineHeight: '1.6',
@@ -124,11 +144,7 @@ export default function Post() {
                     {String(children).replace(/\n$/, '')}
                   </SyntaxHighlighter>
                 </div>
-              ) : (
-                <code className={`${className} bg-gray-100 dark:bg-gray-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded font-mono text-sm font-medium`} {...props}>
-                  {children}
-                </code>
-              )
+              );
             }
           }}
         >
