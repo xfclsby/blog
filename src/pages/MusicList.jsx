@@ -15,10 +15,15 @@ export default function MusicList() {
 
   const fetchMusic = async () => {
     setLoading(true);
+    // Timeout promise to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timed out')), 10000)
+    );
+
     try {
-      const files = await getFiles('public/music');
+      const files = await Promise.race([getFiles('public/music'), timeoutPromise]);
       const musicFiles = (Array.isArray(files) ? files : [files]).filter(file => 
-          file.name.match(/\.(mp3|ogg|wav)$/i)
+          file && file.name && file.name.match(/\.(mp3|ogg|wav)$/i)
       );
       setSongsList(musicFiles);
       setSongs(musicFiles);
@@ -28,6 +33,7 @@ export default function MusicList() {
         setSongs([]);
       } else {
         console.error("Error fetching music:", error);
+        // Don't alert on timeout/network errors to avoid spamming, just log
       }
     } finally {
       setLoading(false);
@@ -36,7 +42,7 @@ export default function MusicList() {
 
   useEffect(() => {
     fetchMusic();
-  }, [setSongs]);
+  }, []); // Remove setSongs from dependency array to avoid infinite loop
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
