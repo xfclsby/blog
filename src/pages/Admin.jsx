@@ -50,12 +50,22 @@ export default function Admin() {
     if (!window.confirm(`Are you sure you want to delete "${file.name}"?`)) return;
     
     try {
+      // Optimistic update: Remove from UI immediately
+      if (type === 'post') {
+        setPosts(prev => prev.filter(p => p.sha !== file.sha));
+      } else {
+        setMusic(prev => prev.filter(m => m.sha !== file.sha));
+      }
+
       await deleteFile(file.path, file.sha, `Delete ${type}: ${file.name}`);
-      // Optimistic update or refresh
-      fetchData();
+      
+      // Delay fetch to allow GitHub API to propagate changes, just in case
+      setTimeout(fetchData, 2000);
     } catch (error) {
       console.error('Delete error:', error);
       alert(`Failed to delete ${file.name}`);
+      // Revert optimistic update by fetching fresh data
+      fetchData();
     }
   };
 

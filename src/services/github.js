@@ -41,7 +41,10 @@ export const getUser = async () => {
 export const getFiles = async (path) => {
   try {
     const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-      params: { ref: DATA_BRANCH }
+      params: { 
+        ref: DATA_BRANCH,
+        timestamp: new Date().getTime() // Cache busting
+      }
     });
     return response.data;
   } catch (error) {
@@ -53,7 +56,10 @@ export const getFiles = async (path) => {
 export const getFileContent = async (path) => {
   try {
     const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-      params: { ref: DATA_BRANCH }
+      params: { 
+        ref: DATA_BRANCH,
+        timestamp: new Date().getTime() // Cache busting
+      }
     });
     const content = decodeBase64(response.data.content);
     return { ...response.data, content };
