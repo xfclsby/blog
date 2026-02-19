@@ -34,7 +34,11 @@ export default function Home() {
 
         setPosts(postsData.filter(Boolean).sort((a, b) => new Date(b.date) - new Date(a.date)));
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        if (error.response && error.response.status === 404) {
+          setPosts([]);
+        } else {
+          console.error("Error fetching posts:", error);
+        }
       } finally {
         setLoading(false);
       }

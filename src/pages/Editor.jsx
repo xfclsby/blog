@@ -64,7 +64,7 @@ export default function Editor() {
       navigate('/');
     } catch (error) {
       console.error("Error saving post:", error);
-      alert("Error saving post");
+      alert(`Error saving post: ${error.message || 'Unknown error'}\nCheck console for details.`);
     } finally {
       setLoading(false);
     }
