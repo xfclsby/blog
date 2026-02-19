@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { getFiles, uploadMusic } from '../services/github';
 import { useMusic } from '../context/MusicContext';
 import { useAuth } from '../context/AuthContext';
-import { FaPlay, FaPause, FaCloudUploadAlt, FaMusic } from 'react-icons/fa';
+import { FaPlay, FaPause, FaCloudUploadAlt, FaMusic, FaSync } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 export default function MusicList() {
@@ -14,10 +14,11 @@ export default function MusicList() {
   const fileInputRef = useRef(null);
 
   const fetchMusic = async () => {
+    setLoading(true);
     try {
       const files = await getFiles('public/music');
       const musicFiles = (Array.isArray(files) ? files : [files]).filter(file => 
-          file.name.endsWith('.mp3') || file.name.endsWith('.ogg') || file.name.endsWith('.wav')
+          file.name.match(/\.(mp3|ogg|wav)$/i)
       );
       setSongsList(musicFiles);
       setSongs(musicFiles);
@@ -53,8 +54,11 @@ export default function MusicList() {
     setUploading(true);
     try {
       await uploadMusic(file);
-      await fetchMusic();
-      alert('Music uploaded successfully!');
+      alert('Music uploaded successfully! List will refresh in 3 seconds due to GitHub API delay.');
+      // Wait for GitHub API to update
+      setTimeout(async () => {
+          await fetchMusic();
+      }, 3000);
     } catch (error) {
       console.error('Error uploading music:', error);
       alert('Error uploading music: ' + (error.message || 'Unknown error'));
@@ -77,7 +81,15 @@ export default function MusicList() {
           Music Library
         </h1>
         {token && (
-          <div>
+          <div className="flex gap-4">
+            <button
+              onClick={fetchMusic}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-bold rounded-xl transition-all duration-200"
+              title="Refresh List"
+            >
+              <FaSync className={loading ? 'animate-spin' : ''} />
+            </button>
             <input 
               type="file" 
               ref={fileInputRef} 
