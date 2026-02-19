@@ -11,6 +11,7 @@ import { useTheme } from '../context/ThemeContext';
 
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { FaCopy, FaCheck } from 'react-icons/fa';
 
 export default function Post() {
   const { slug } = useParams();
@@ -79,27 +80,44 @@ export default function Post() {
           components={{
             code({node, inline, className, children, ...props}) {
               const match = /language-(\w+)/.exec(className || '')
+              const [copied, setCopied] = useState(false);
+
+              const handleCopy = () => {
+                navigator.clipboard.writeText(String(children).replace(/\n$/, ''));
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              };
+
               return !inline && match ? (
-                <div className="rounded-xl overflow-hidden shadow-2xl my-6 border border-gray-700/50">
-                  <div className="flex items-center justify-between px-4 py-2 bg-[#1e1e1e] border-b border-gray-700">
-                    <div className="flex space-x-2">
-                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                      <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                    </div>
-                    <span className="text-xs text-gray-400 font-mono uppercase tracking-wider">{match[1]}</span>
+                <div className="rounded-xl overflow-hidden shadow-2xl my-6 border border-gray-800 bg-[#1e1e1e] group relative">
+                  <div className="absolute top-3 right-3 flex items-center gap-3 z-10">
+                    <span className="text-xs text-gray-500 font-mono font-bold uppercase tracking-wider select-none">
+                      {match[1]}
+                    </span>
+                    <button 
+                      onClick={handleCopy}
+                      className={`p-1.5 rounded-lg transition-all duration-200 border border-transparent ${
+                        copied 
+                          ? 'bg-green-500/10 text-green-400 border-green-500/20' 
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white opacity-0 group-hover:opacity-100'
+                      }`}
+                      title="Copy code"
+                    >
+                      {copied ? <FaCheck className="w-3.5 h-3.5" /> : <FaCopy className="w-3.5 h-3.5" />}
+                    </button>
                   </div>
+                  
                   <SyntaxHighlighter
                     style={vscDarkPlus}
                     language={match[1]}
                     PreTag="div"
                     customStyle={{
                       margin: 0,
-                      padding: '1.5rem',
+                      padding: '2.5rem 1.5rem 1.5rem 1.5rem',
                       background: '#1e1e1e',
-                      fontSize: '0.95rem',
+                      fontSize: '0.9rem',
                       lineHeight: '1.6',
-                      borderRadius: '0 0 0.75rem 0.75rem',
+                      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
                     }}
                     {...props}
                   >
