@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { REPO_OWNER, REPO_NAME } from '../config';
+import { REPO_OWNER, REPO_NAME, DATA_BRANCH } from '../config';
 
 const GITHUB_API_URL = 'https://api.github.com';
 
@@ -30,7 +30,9 @@ const encodeBase64 = (str) => {
 
 export const getFiles = async (path) => {
   try {
-    const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`);
+    const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      params: { ref: DATA_BRANCH }
+    });
     return response.data;
   } catch (error) {
     console.error('Error fetching files:', error);
@@ -40,7 +42,9 @@ export const getFiles = async (path) => {
 
 export const getFileContent = async (path) => {
   try {
-    const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`);
+    const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
+      params: { ref: DATA_BRANCH }
+    });
     const content = decodeBase64(response.data.content);
     return { ...response.data, content };
   } catch (error) {
@@ -55,6 +59,7 @@ export const createOrUpdateFile = async (path, content, message, sha = null) => 
     const data = {
       message,
       content: contentBase64,
+      branch: DATA_BRANCH,
     };
     if (sha) {
       data.sha = sha;
@@ -81,6 +86,7 @@ export const deleteFile = async (path, sha, message) => {
     const data = {
       message,
       sha,
+      branch: DATA_BRANCH,
     };
     const response = await api.delete(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, { data });
     return response.data;
@@ -101,7 +107,8 @@ export const uploadImage = async (file) => {
             try {
                 const response = await api.put(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
                     message: `Upload image ${fileName}`,
-                    content: base64Content
+                    content: base64Content,
+                    branch: DATA_BRANCH
                 });
                 // Construct the download URL manually or use the one from response
                 // If using GitHub Pages, the URL might be different from raw.githubusercontent.com
@@ -126,7 +133,8 @@ export const uploadMusic = async (file) => {
              try {
                 const response = await api.put(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
                     message: `Upload music ${fileName}`,
-                    content: base64Content
+                    content: base64Content,
+                    branch: DATA_BRANCH
                 });
                 resolve(response.data.content.download_url);
             } catch (error) {
