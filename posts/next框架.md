@@ -5,6 +5,9 @@ description: 前端开发hooks使用
 tags:
   - node.js
 ---
+
+
+```typescript
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
@@ -94,4 +97,4 @@ export function useParallax(speed = 0.5) {
   }, [speed])
 
   return offset
-}
+}```
