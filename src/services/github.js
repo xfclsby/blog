@@ -28,6 +28,16 @@ const encodeBase64 = (str) => {
 };
 
 
+export const getUser = async () => {
+  try {
+    const response = await api.get('/user');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    throw error;
+  }
+};
+
 export const getFiles = async (path) => {
   try {
     const response = await api.get(`/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {

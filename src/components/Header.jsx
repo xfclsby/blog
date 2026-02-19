@@ -4,15 +4,16 @@ import ThemeToggle from './ThemeToggle';
 import { motion } from 'framer-motion';
 
 export default function Header() {
-  const { token, logout } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
 
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Music', path: '/music' },
   ];
 
-  if (token) {
+  if (isAdmin) {
     navLinks.push({ name: 'New Post', path: '/editor' });
+    navLinks.push({ name: 'Admin', path: '/admin' });
   }
 
   return (
@@ -37,13 +38,18 @@ export default function Header() {
           <div className="flex items-center space-x-4 pl-4 border-l border-gray-300 dark:border-gray-700">
             <ThemeToggle />
             
-            {token ? (
-              <button 
-                onClick={logout} 
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-all transform hover:scale-105"
-              >
-                Logout
-              </button>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600 dark:text-gray-300 hidden md:block">
+                  {user.login}
+                </span>
+                <button 
+                  onClick={logout} 
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-medium transition-all transform hover:scale-105"
+                >
+                  Logout
+                </button>
+              </div>
             ) : (
               <Link 
                 to="/login" 

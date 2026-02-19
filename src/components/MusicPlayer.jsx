@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMusic } from '../context/MusicContext';
+import { useAuth } from '../context/AuthContext';
 import { FaPlay, FaPause, FaStepForward, FaStepBackward, FaMusic } from 'react-icons/fa';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function MusicPlayer() {
   const { currentSong, isPlaying, togglePlay, setIsPlaying, playlist, playSong } = useMusic();
+  const { user } = useAuth();
   const audioRef = useRef(null);
   const [progress, setProgress] = useState(0);
 
@@ -53,7 +55,7 @@ export default function MusicPlayer() {
     }
   };
 
-  if (!currentSong) return null;
+  if (!currentSong || !user) return null;
 
   return (
     <AnimatePresence>

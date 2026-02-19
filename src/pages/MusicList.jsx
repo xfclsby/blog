@@ -10,7 +10,7 @@ export default function MusicList() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const { playSong, currentSong, isPlaying, togglePlay, setSongs } = useMusic();
-  const { token } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const fileInputRef = useRef(null);
 
   const fetchMusic = async () => {
@@ -41,8 +41,10 @@ export default function MusicList() {
   };
 
   useEffect(() => {
-    fetchMusic();
-  }, []); // Remove setSongs from dependency array to avoid infinite loop
+    if (user) {
+      fetchMusic();
+    }
+  }, [user]);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -74,6 +76,30 @@ export default function MusicList() {
     }
   };
 
+  if (authLoading) return (
+    <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+    </div>
+  );
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <FaMusic className="text-6xl text-gray-300 mb-6" />
+        <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-4">Music Library</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md">
+          Please log in with your GitHub account to listen to music.
+        </p>
+        <a 
+          href="/#/login" 
+          className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transform hover:scale-[1.02] transition-all duration-200"
+        >
+          Log In to Listen
+        </a>
+      </div>
+    );
+  }
+
   if (loading) return (
     <div className="flex justify-center items-center h-64">
       <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -86,7 +112,7 @@ export default function MusicList() {
         <h1 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">
           Music Library
         </h1>
-        {token && (
+        {isAdmin && (
           <div className="flex gap-4">
             <button
               onClick={fetchMusic}
@@ -120,7 +146,7 @@ export default function MusicList() {
             <div className="p-12 text-center text-gray-500 dark:text-gray-400 flex flex-col items-center">
                 <FaMusic className="text-6xl mb-4 opacity-20" />
                 <p className="text-xl">No music found.</p>
-                {token && <p className="mt-2 text-sm">Upload some tunes to get the party started!</p>}
+                {isAdmin && <p className="mt-2 text-sm">Upload some tunes to get the party started!</p>}
             </div>
         ) : (
             <ul className="divide-y divide-gray-100 dark:divide-gray-800">
