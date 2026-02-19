@@ -9,6 +9,9 @@ import { REPO_OWNER, REPO_NAME } from '../config';
 import { motion } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+
 export default function Post() {
   const { slug } = useParams();
   const [post, setPost] = useState(null);
@@ -72,7 +75,47 @@ export default function Post() {
       </header>
       
       <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-xl prose-img:shadow-lg leading-relaxed">
-        <ReactMarkdown>{post.content}</ReactMarkdown>
+        <ReactMarkdown
+          components={{
+            code({node, inline, className, children, ...props}) {
+              const match = /language-(\w+)/.exec(className || '')
+              return !inline && match ? (
+                <div className="rounded-xl overflow-hidden shadow-2xl my-6 border border-gray-700/50">
+                  <div className="flex items-center justify-between px-4 py-2 bg-[#1e1e1e] border-b border-gray-700">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                    </div>
+                    <span className="text-xs text-gray-400 font-mono uppercase tracking-wider">{match[1]}</span>
+                  </div>
+                  <SyntaxHighlighter
+                    style={vscDarkPlus}
+                    language={match[1]}
+                    PreTag="div"
+                    customStyle={{
+                      margin: 0,
+                      padding: '1.5rem',
+                      background: '#1e1e1e',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.6',
+                      borderRadius: '0 0 0.75rem 0.75rem',
+                    }}
+                    {...props}
+                  >
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
+                </div>
+              ) : (
+                <code className={`${className} bg-gray-100 dark:bg-gray-800 text-pink-600 dark:text-pink-400 px-1.5 py-0.5 rounded font-mono text-sm font-medium`} {...props}>
+                  {children}
+                </code>
+              )
+            }
+          }}
+        >
+          {post.content}
+        </ReactMarkdown>
       </div>
       
       <div className="mt-16 pt-10 border-t border-gray-200 dark:border-gray-700">
